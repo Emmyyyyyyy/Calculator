@@ -1,42 +1,140 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import styled from "styled-components"
 
 function Calculator(){
     const [show, setShow] = useState('0')
+    const [prevNum, setPrevNum] = useState('')
+    const [sign, setSign] = useState('')
 
     function DeleteBtn(){
-        setShow(show.slice(0, -1))
+        if(show.length === 1){
+            setShow('0')
+        }
+        else {
+            setShow(show.slice(0, -1))
+        }
     }
 
-    function handleZeroBtn(){
+    function handleNumBtn(num){
+        if(num === "0" && show.length < 10){
+            if((show.length >= 2 && show[1] === '.') || (show[0] !== '0')){
+                setShow(show + '0')
+            }
+        }
+        else if(num !== '0' && show.length < 10) {
+            if(show[0] === '0' && show[1] !== '.'){
+                setShow(num)
+            }
+            else{
+                setShow(show + num)
+            }
+        }
+    }
+
+    function DecimalPointBtn(){
+        if(show.indexOf(".") === -1){
+            setShow(show + '.')
+        }
+    }
+
+    function handleACBtn(){
+        if(show !== '0'){
+            setShow('0')
+        }
+        else if(prevNum !== '0' || sign !== ''){
+            setPrevNum('')
+            setSign('')
+        }
+    }
+
+    function handleSigns(curSign){
+        if(curSign !== '=')
+            setSign(curSign)
+        else
+            setSign('')
+
+        if(curSign === '=' ){
+            if(sign === '+'){
+                setShow((show - 0) + (prevNum - 0) + '')
+            }
+            else if(sign === '-'){
+                if(prevNum === ''){
+                    setShow(show+'')
+                }
+                else{
+                    setShow(prevNum - show + '')
+                }
+            }
+            else if(sign === '*'){
+                setShow(show * prevNum + '')    
+            }
+            else if(sign === '/'){
+                if(prevNum === ''){
+                    setShow(show + '')
+                }
+                else{
+                    setShow((prevNum / show).toFixed(3) + '')
+                }
+            }
+            setPrevNum('')
+        }
+        else {
+            setPrevNum(show)
+            setShow('0')
+            if(sign === '+'){
+                setPrevNum((show - 0) + (prevNum - 0) + '')
+            }
+            else if(sign === '-'){
+                if(prevNum === ''){
+                    setPrevNum(show + '')
+                }
+                else{
+                    setPrevNum(prevNum - show + '')
+                }
+            }
+            else if(sign === '*'){
+                setPrevNum(show * prevNum + '')    
+            }
+            else if(sign === '/'){
+                if(prevNum === ''){
+                    setPrevNum(show + '')
+                }
+                else{
+                    setPrevNum((prevNum / show).toFixed(3) + '')
+                }
+            }
+        }
         
     }
+
 
     return (
         <Wrapper>
             <Box>
                 <Result>
+                    <PrevNum>{prevNum}</PrevNum>
+                    <Sign>{sign}</Sign>
                     <ResultText>{show}</ResultText>
                 </Result>
                 <ButtonBox>
                     <SmallButton onClick={DeleteBtn}>DEL</SmallButton>
-                    <SmallButton>/</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('7') : setShow(show + '7')}}>7</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('8') : setShow(show + '8')}}>8</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('9') : setShow(show + '9')}}>9</SmallButton>
-                    <SmallButton>*</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('4') : setShow(show + '4')}}>4</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('5') : setShow(show + '5')}}>5</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('6') : setShow(show + '6')}}>6</SmallButton>
-                    <SmallButton>-</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('1') : setShow(show + '1')}}>1</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('2') : setShow(show + '2')}}>2</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? setShow('3') : setShow(show + '3')}}>3</SmallButton>
-                    <SmallButton>+</SmallButton>
-                    <SmallButton onClick={()=>{show[0]==='0' ? null : setShow(show + '0')}}>0</SmallButton>
-                    <SmallButton onClick={()=>{setShow(show + '.')}}>.</SmallButton>
-                    <AC onClick={()=>{setShow('0')}}>AC</AC>
-                    <Equal>=</Equal>
+                    <SmallButton onClick={()=>handleSigns('/')}>/</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('7')}>7</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('8')}>8</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('9')}>9</SmallButton>
+                    <SmallButton onClick={()=>handleSigns('*')}>*</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('4')}>4</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('5')}>5</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('6')}>6</SmallButton>
+                    <SmallButton onClick={()=>handleSigns('-')}>-</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('1')}>1</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('2')}>2</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('3')}>3</SmallButton>
+                    <SmallButton onClick={()=>handleSigns('+')}>+</SmallButton>
+                    <SmallButton onClick={()=>handleNumBtn('0')}>0</SmallButton>
+                    <SmallButton onClick={()=>DecimalPointBtn()}>.</SmallButton>
+                    <AC onClick={()=>{handleACBtn()}}>AC</AC>
+                    <Equal onClick={()=>handleSigns('=')}>=</Equal>
                 </ButtonBox>
             </Box>
         </Wrapper>
@@ -89,6 +187,23 @@ const ResultText = styled.p`
     right:  0;
     bottom: 0;
     font-size: 30px;
+    font-family: 'Press Start 2P', cursive;
+`
+
+const PrevNum = styled.div`
+    position: absolute;
+    margin: 20px;
+    right: 0;
+    color: grey;
+    font-family: 'Press Start 2P', cursive;
+`
+
+const Sign = styled.div`
+    position: absolute;
+    margin: 20px;
+    right: 0;
+    top: 25%;
+    color: grey;
     font-family: 'Press Start 2P', cursive;
 `
 
